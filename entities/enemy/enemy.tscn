@@ -1,13 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://j5hajptmn11q"]
 
-[ext_resource type="Script" uid="uid://7ss6xlubkc1f" path="res://entities/enemy/enemy.gd" id="2_4a34c"]
+[ext_resource type="PackedScene" uid="uid://c415t4tvgwntg" path="res://entities/entity.tscn" id="1_ksmh7"]
 
-[node name="Enemy" type="CharacterBody2D"]
-script = ExtResource("2_4a34c")
+[node name="Enemy" instance=ExtResource("1_ksmh7")]
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 2)
+[node name="DetectionArea" parent="." index="3"]
+collision_layer = 4
+collision_mask = 2

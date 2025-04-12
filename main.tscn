@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=4 uid="uid://cow01sa1t08q2"]
+[gd_scene load_steps=9 format=4 uid="uid://cow01sa1t08q2"]
 
 [ext_resource type="Script" uid="uid://wwi6511ihfl0" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://cmu6x8js7qice" path="res://assets/tilesets/tiles.png" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://brfwwsjsn7muq" path="res://entities/monsters/knight/knight.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://1ek5rnrpdv4q" path="res://entities/player/player.tscn" id="4_1bvp3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0xm2m"]
 texture = ExtResource("2_0xm2m")
@@ -1155,4 +1156,9 @@ tile_set = SubResource("TileSet_1bvp3")
 position = Vector2(320, 180)
 
 [node name="Knight" parent="." instance=ExtResource("3_h2yge")]
-position = Vector2(26, 316)
+position = Vector2(128, 162)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Player" parent="." instance=ExtResource("4_1bvp3")]
+position = Vector2(81, 162)

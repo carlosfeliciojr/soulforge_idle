@@ -3,8 +3,6 @@ extends Entity
 ## Enemy is a abstract class and should not be instantiated.
 class_name Enemy
 
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-
 @export var wander_time: float = 2.0
 @export var wander_radius: float = 100.0
 @export var wander_time_min: float = 1.0
@@ -14,10 +12,12 @@ var _wander_target: Vector2
 var _wander_timer: float = 0.0
 
 func _ready():
+	super._ready()
 	_pick_new_wander_target()
 
 
 func _physics_process(delta: float):
+	super._physics_process(delta)
 	wander(delta)
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://brfwwsjsn7muq"]
+[gd_scene load_steps=46 format=3 uid="uid://brfwwsjsn7muq"]
 
 [ext_resource type="PackedScene" uid="uid://j5hajptmn11q" path="res://entities/enemy/enemy.tscn" id="1_mwajj"]
 [ext_resource type="Script" uid="uid://drvihiq7h4jum" path="res://entities/monsters/knight/knight.gd" id="2_c16u0"]
@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://d5xoaia5nyyj" path="res://assets/sprites/knight red/IDLE.png" id="4_c16u0"]
 [ext_resource type="Texture2D" uid="uid://cramfop5ib1r0" path="res://assets/sprites/knight red/RUN.png" id="5_npte5"]
 [ext_resource type="Texture2D" uid="uid://cmy7hhwx444ah" path="res://assets/sprites/knight red/WALK.png" id="7_npte5"]
+[ext_resource type="Shape2D" uid="uid://cj30r8lc3oy8q" path="res://resources/collision_shape/human_collision_shape.tres" id="8_ya15f"]
+[ext_resource type="Shape2D" uid="uid://bthbh310k1sot" path="res://resources/detection_area/detection_area.tres" id="9_me8gq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8r7af"]
 atlas = ExtResource("3_c16u0")
@@ -281,13 +283,15 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_npte5"]
-radius = 6.0
-height = 18.0
-
 [node name="Knight" instance=ExtResource("1_mwajj")]
+collision_mask = 7
 script = ExtResource("2_c16u0")
-move_speed = 25.0
+wander_time = 2.0
+wander_radius = 100.0
+wander_time_min = 1.0
+wander_time_max = 3.0
+move_speed = 100.0
+detection_radius = 64.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_8r7af")
@@ -295,7 +299,13 @@ animation = &"walk"
 autoplay = "idle"
 frame_progress = 0.60036
 
-[node name="CollisionShape2D" parent="." index="2"]
+[node name="CollisionShape" parent="." index="2"]
+light_mask = 1
+visibility_layer = 1
 position = Vector2(0, 14)
 rotation = 1.5708
-shape = SubResource("CapsuleShape2D_npte5")
+shape = ExtResource("8_ya15f")
+
+[node name="DetectionShape" parent="DetectionArea" index="0"]
+position = Vector2(0, 14)
+shape = ExtResource("9_me8gq")
