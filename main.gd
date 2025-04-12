@@ -1,5 +1,7 @@
 extends Node2D
 
+const KNIGHT: PackedScene = preload("res://entities/monsters/knight/knight.tscn")
+
 @onready var ground_tile_map_layer: TileMapLayer = $GroundTileMapLayer
 
 # Called when the node enters the scene tree for the first time.
@@ -7,6 +9,7 @@ func _ready() -> void:
 	var map_size: Vector2i = ground_tile_map_layer.get_used_rect().size
 	var map_tile_size: Vector2i = ground_tile_map_layer.tile_set.tile_size
 	var enemies: Array[Enemy] = GameManager.create_enemies(
+		KNIGHT,
 		5,
 		map_size, 
 		map_tile_size,

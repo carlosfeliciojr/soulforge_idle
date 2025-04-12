@@ -1,11 +1,10 @@
 extends Node
 
-const KNIGHT: PackedScene = preload("res://entities/monsters/knight/knight.tscn")
-
 func game_loop() -> void:
 	pass
 
 func create_enemies(
+	enemy: PackedScene,
 	amount: int,
 	map_size: Vector2i,
 	tile_size: Vector2i,
@@ -27,8 +26,8 @@ func create_enemies(
 		var is_overlapping: bool = enemies.any(func(e): return e.global_position == enemy_position)
 		
 		if enemy_position != player_position and not is_overlapping:
-			var knight_enemy: Knight = KNIGHT.instantiate()
-			knight_enemy.global_position = enemy_position
-			enemies.append(knight_enemy)
+			var _enemy = enemy.instantiate()
+			_enemy.global_position = enemy_position
+			enemies.append(_enemy)
 	
 	return enemies
