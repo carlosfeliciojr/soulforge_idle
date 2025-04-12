@@ -8,8 +8,11 @@ class_name Enemy
 @export var wander_time_min: float = 1.0
 @export var wander_time_max: float = 3.0
 
+
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
+var _is_chasing: bool = false
+var _target: Node2D
 
 func _ready():
 	super._ready()
@@ -18,17 +21,10 @@ func _ready():
 
 func _physics_process(delta: float):
 	super._physics_process(delta)
+	if _is_chasing:
+		chase(delta)
+		return
 	wander(delta)
-
-
-func play_animation(name: String):
-	if sprite.animation != name:
-		sprite.play(name)
-
-
-func _flip_sprite(direction_x: float):
-	if abs(direction_x) > 0.01:
-		sprite.flip_h = direction_x < 0
 
 
 func _stop_and_wait(delta: float):
@@ -37,6 +33,13 @@ func _stop_and_wait(delta: float):
 	_wander_timer -= delta
 	if _wander_timer <= 0:
 		_pick_new_wander_target()
+
+
+func _pick_new_wander_target():
+	var angle = randf_range(0, TAU)
+	var offset = Vector2(cos(angle), sin(angle)) * randf_range(0, wander_radius)
+	_wander_target = position + offset
+	_wander_timer = randf_range(wander_time_min, wander_time_max)
 
 
 func wander(delta: float) -> void:
@@ -52,11 +55,25 @@ func wander(delta: float) -> void:
 			_stop_and_wait(delta)
 		else:
 			play_animation("walk")
-			_flip_sprite(direction.x)
+			flip_sprite(direction.x)
 
 
-func _pick_new_wander_target():
-	var angle = randf_range(0, TAU)
-	var offset = Vector2(cos(angle), sin(angle)) * randf_range(0, wander_radius)
-	_wander_target = position + offset
-	_wander_timer = randf_range(wander_time_min, wander_time_max)
+func chase(delta: float) -> void:
+	if _target == null or is_instance_valid(_target) == false: return
+	
+	var direction: Vector2 = (_target.global_position - global_position).normalized()
+	play_animation("run")
+	flip_sprite(direction.x)
+	velocity = direction * move_speed * 1.50
+	move_and_collide(velocity * delta)
+	
+
+func _on_detection_area_area_entered(area: Area2D) -> void:
+	super._on_detection_area_area_entered(area)
+	_target = area
+	_is_chasing = true
+
+func _on_detection_area_area_exited(area: Area2D) -> void:
+	super._on_detection_area_area_exited(area)
+	_target = null
+	_is_chasing = false

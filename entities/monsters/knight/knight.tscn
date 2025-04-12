@@ -290,7 +290,7 @@ wander_time = 2.0
 wander_radius = 100.0
 wander_time_min = 1.0
 wander_time_max = 3.0
-move_speed = 100.0
+move_speed = 25.0
 detection_radius = 64.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]

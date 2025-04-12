@@ -285,7 +285,11 @@ animations = [{
 
 [node name="Player" instance=ExtResource("1_symyc")]
 script = ExtResource("2_abrql")
-detection_radius = 256.0
+wander_time = 2.0
+wander_radius = 100.0
+wander_time_min = 1.0
+wander_time_max = 3.0
+move_speed = 200.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_7thud")

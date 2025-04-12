@@ -1157,7 +1157,10 @@ position = Vector2(320, 180)
 
 [node name="Knight" parent="." instance=ExtResource("3_h2yge")]
 position = Vector2(128, 162)
-collision_layer = 1
+collision_mask = 1
+
+[node name="Knight2" parent="." instance=ExtResource("3_h2yge")]
+position = Vector2(37, 85)
 collision_mask = 1
 
 [node name="Player" parent="." instance=ExtResource("4_1bvp3")]
