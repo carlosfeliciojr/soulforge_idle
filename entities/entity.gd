@@ -1,4 +1,4 @@
-extends Node2D
+extends CharacterBody2D
 
 ## Entity is a abstract class and should not be instantiated.
 ##
@@ -12,3 +12,4 @@ class_name Entity
 @export var defense_chance: float
 @export var move_speed: float
 @export var speed_attack: float
+@export var detection_radius: float
