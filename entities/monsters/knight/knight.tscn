@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://brfwwsjsn7muq"]
+[gd_scene load_steps=47 format=3 uid="uid://brfwwsjsn7muq"]
 
 [ext_resource type="PackedScene" uid="uid://j5hajptmn11q" path="res://entities/enemy/enemy.tscn" id="1_mwajj"]
 [ext_resource type="Script" uid="uid://drvihiq7h4jum" path="res://entities/monsters/knight/knight.gd" id="2_c16u0"]
@@ -283,6 +283,10 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_me8gq"]
+radius = 14.0
+height = 56.0
+
 [node name="Knight" instance=ExtResource("1_mwajj")]
 collision_mask = 7
 script = ExtResource("2_c16u0")
@@ -295,9 +299,9 @@ detection_radius = 64.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_8r7af")
-animation = &"walk"
-autoplay = "idle"
-frame_progress = 0.60036
+animation = &"attack"
+frame = 5
+frame_progress = 1.0
 
 [node name="CollisionShape" parent="." index="2"]
 light_mask = 1
@@ -309,3 +313,12 @@ shape = ExtResource("8_ya15f")
 [node name="DetectionShape" parent="DetectionArea" index="0"]
 position = Vector2(0, 14)
 shape = ExtResource("9_me8gq")
+debug_color = Color(0.749329, 0.460145, 0, 0.42)
+
+[node name="AttackShape" parent="AttackRange" index="0"]
+position = Vector2(0, 14)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_me8gq")
+debug_color = Color(1, 0, 0.0899788, 0.42)
+
+[node name="TimeBetweenAttacks" type="Timer" parent="." index="5"]

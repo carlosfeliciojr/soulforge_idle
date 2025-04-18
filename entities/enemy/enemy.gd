@@ -11,8 +11,7 @@ class_name Enemy
 
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
-var _is_chasing: bool = false
-var _target: Node2D
+var _target: Player
 
 func _ready():
 	super._ready()
@@ -21,8 +20,11 @@ func _ready():
 
 func _physics_process(delta: float):
 	super._physics_process(delta)
-	if _is_chasing:
+	if state == CombatState.CHASING:
 		chase(delta)
+		return
+	if state == CombatState.ATTACKING:
+		attack_target(_target as Entity)
 		return
 	wander(delta)
 
@@ -66,14 +68,28 @@ func chase(delta: float) -> void:
 	flip_sprite(direction.x)
 	velocity = direction * move_speed * 1.50
 	move_and_collide(velocity * delta)
-	
+
 
 func _on_detection_area_area_entered(area: Area2D) -> void:
 	super._on_detection_area_area_entered(area)
-	_target = area
-	_is_chasing = true
+	var maybe_player = area.get_owner()
+	if maybe_player.is_in_group("Player"):
+		_target = maybe_player
+		state = CombatState.CHASING
+
 
 func _on_detection_area_area_exited(area: Area2D) -> void:
 	super._on_detection_area_area_exited(area)
 	_target = null
-	_is_chasing = false
+	state = CombatState.WANDERING
+
+
+func _on_attack_range_area_entered(area: Area2D) -> void:
+	super._on_attack_range_area_entered(area)
+	var maybe_player = area.get_owner()
+	if maybe_player.is_in_group("Player"):
+		state = CombatState.ATTACKING
+
+
+func _on_attack_range_area_exited(area: Area2D) -> void:
+	pass # Replace with function body.
