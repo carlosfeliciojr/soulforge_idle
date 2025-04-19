@@ -11,7 +11,7 @@ class_name Enemy
 
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
-var _target: Player
+
 
 func _ready():
 	super._ready()
@@ -24,8 +24,9 @@ func _physics_process(delta: float):
 		chase(delta)
 		return
 	if state == CombatState.ATTACKING:
-		attack_target(_target as Entity)
+		attack_target(target)
 		return
+	
 	wander(delta)
 
 
@@ -61,9 +62,9 @@ func wander(delta: float) -> void:
 
 
 func chase(delta: float) -> void:
-	if _target == null or is_instance_valid(_target) == false: return
+	if target == null or is_instance_valid(target) == false: return
 	
-	var direction: Vector2 = (_target.global_position - global_position).normalized()
+	var direction: Vector2 = (target.global_position - global_position).normalized()
 	play_animation("run")
 	flip_sprite(direction.x)
 	velocity = direction * move_speed * 1.50
@@ -74,13 +75,13 @@ func _on_detection_area_area_entered(area: Area2D) -> void:
 	super._on_detection_area_area_entered(area)
 	var maybe_player = area.get_owner()
 	if maybe_player.is_in_group("Player"):
-		_target = maybe_player
+		target = maybe_player
 		state = CombatState.CHASING
 
 
 func _on_detection_area_area_exited(area: Area2D) -> void:
 	super._on_detection_area_area_exited(area)
-	_target = null
+	target = null
 	state = CombatState.WANDERING
 
 

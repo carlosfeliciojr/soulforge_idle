@@ -22,6 +22,9 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 @export var attack_range: float
 
 var state: CombatState = CombatState.IDLE
+var target: Entity
+var is_attacking: bool = false
+var is_defending: bool = false
 
 func _ready() -> void:
 	var circle = CircleShape2D.new()
@@ -37,9 +40,14 @@ func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
 
 
-func play_animation(name: String):
+func play_animation(name: String) -> void:
 	if sprite.animation != name:
 		sprite.play(name)
+
+
+func force_play_animation(name: String) -> void:
+	sprite.play(name)
+	sprite.frame = 0
 
 
 func flip_sprite(direction_x: float):
@@ -49,25 +57,35 @@ func flip_sprite(direction_x: float):
 
 func attack_target(target: Entity) -> void:
 	if target == null or is_instance_valid(target) == false: return
+	if is_attacking: return
 	if target.has_method("receive_attack"):
-		play_animation("attack")
+		is_attacking = true
 		target.receive_attack(attack_damage)
+		play_animation("attack")
 
 
 func _on_animation_finished() -> void:
-	if sprite.animation == "attack":
-		sprite.play("idle")
-		await get_tree().create_timer(0.5).timeout
+	match sprite.animation:
+		"attack":
+			sprite.play("idle")
+			await get_tree().create_timer(1.0).timeout
+			is_attacking = false
+		"defend":
+			is_defending = false
+			sprite.play("idle")
+		"idle":
+			pass
 
 
 func receive_attack(damage: float) -> void:
-	print("%s foi atacado!" % name)
-	# Aqui o NPC pode reagir (animação, reduzir vida, trocar estado etc)
 	if randf() > defense_chance:
 		health -= damage
 		state = CombatState.BEING_HIT
+		print("Levou dano")
 	else:
-		print("Defendeu!")
+		is_defending = true
+		force_play_animation("defend")
+		print("Defendendo!")
 	if health <= 0:
 		state = CombatState.DEAD
 
