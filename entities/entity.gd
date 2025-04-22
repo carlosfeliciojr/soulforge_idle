@@ -10,6 +10,8 @@ class_name Entity
 const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var detection_area: Area2D = $DetectionArea
+@onready var attack_range: Area2D = $AttackRange
 @onready var collision_shape: CollisionShape2D = $CollisionShape
 @onready var detection_shape: CollisionShape2D = $DetectionArea/DetectionShape
 @onready var action_cooldown: Timer = $ActionCooldown
@@ -20,7 +22,7 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 @export var move_speed: float
 @export var attack_speed: float
 @export var detection_radius: float
-@export var attack_range: float
+@export var attack_range_radius: float
 @export var cooldown_between_actions: float
 @export var wander_time: float = 2.0
 @export var wander_radius: float = 100.0
@@ -51,6 +53,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
+	if state == CombatState.DEAD: return
 	match state:
 		CombatState.IDLE:
 			play_animation("idle")
@@ -135,10 +138,24 @@ func receive_attack(damage: float) -> void:
 	health -= damage
 	is_in_a_being_hitted_animation = true
 	force_play_animation("hurt")
-	log_action("Being hitted")
-	# TODO: This code cause bug, because don't have DEAD status
-	#if health <= 0:
-		#state = CombatState.DEAD
+	log_action("Being hitted. Health is %f" % health)
+
+	if health <= 0:
+		dead()
+		log_action("is dead")
+
+
+func dead() -> void:
+	if state == CombatState.DEAD: return
+	state = CombatState.DEAD
+	velocity = Vector2.ZERO
+	is_in_an_attack_animation = false
+	is_in_a_defend_animation = false
+	is_in_a_being_hitted_animation = false
+	play_animation("death")
+	collision_shape.disabled = true
+	if detection_shape:
+		detection_shape.disabled = true
 
 
 func _stop_and_wait(delta: float):
@@ -192,6 +209,7 @@ func _on_detection_area_body_entered(body: Node2D) -> void:
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	target = null
+	if state == CombatState.DEAD: return
 	state = CombatState.WANDERING
 
 
@@ -200,4 +218,4 @@ func _on_attack_range_body_entered(body: Node2D) -> void:
 
 
 func _on_attack_range_body_exited(body: Node2D) -> void:
-	pass # Replace with function body.
+	if state == CombatState.DEAD: return

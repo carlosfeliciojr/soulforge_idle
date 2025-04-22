@@ -1,10 +1,11 @@
-[gd_scene load_steps=52 format=3 uid="uid://brfwwsjsn7muq"]
+[gd_scene load_steps=65 format=3 uid="uid://brfwwsjsn7muq"]
 
 [ext_resource type="PackedScene" uid="uid://j5hajptmn11q" path="res://entities/enemy/enemy.tscn" id="1_mwajj"]
 [ext_resource type="Script" uid="uid://drvihiq7h4jum" path="res://entities/monsters/knight/knight.gd" id="2_c16u0"]
 [ext_resource type="Texture2D" uid="uid://0lr5017hskhp" path="res://assets/sprites/knight red/ATTACK 1.png" id="3_c16u0"]
 [ext_resource type="Texture2D" uid="uid://dppw5rth38psw" path="res://assets/sprites/knight red/DEFEND.png" id="3_eu3bi"]
 [ext_resource type="Texture2D" uid="uid://d5xoaia5nyyj" path="res://assets/sprites/knight red/IDLE.png" id="4_c16u0"]
+[ext_resource type="Texture2D" uid="uid://bqysyvw5qydp2" path="res://assets/sprites/knight red/DEATH.png" id="4_y7fj7"]
 [ext_resource type="Texture2D" uid="uid://cphsooevxaxi4" path="res://assets/sprites/knight red/HURT.png" id="5_8r7af"]
 [ext_resource type="Texture2D" uid="uid://cramfop5ib1r0" path="res://assets/sprites/knight red/RUN.png" id="5_npte5"]
 [ext_resource type="Texture2D" uid="uid://cmy7hhwx444ah" path="res://assets/sprites/knight red/WALK.png" id="7_npte5"]
@@ -35,6 +36,54 @@ region = Rect2(384, 0, 96, 84)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ofvre"]
 atlas = ExtResource("3_c16u0")
 region = Rect2(480, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o3y1n"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(0, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_evxbd"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(96, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lrun2"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(192, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8k5ut"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(288, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0g535"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(384, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8n4ic"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(480, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5jbm"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(576, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oxxw3"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(672, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oyp67"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(768, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sggsc"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(864, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ec1s3"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(960, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dsegp"]
+atlas = ExtResource("4_y7fj7")
+region = Rect2(1056, 0, 96, 84)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_icm7a"]
 atlas = ExtResource("3_eu3bi")
@@ -195,6 +244,47 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_o3y1n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_evxbd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lrun2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8k5ut")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0g535")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8n4ic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5jbm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oxxw3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oyp67")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sggsc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ec1s3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dsegp")
+}],
+"loop": false,
+"name": &"death",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_icm7a")
 }, {
 "duration": 1.0,
@@ -322,7 +412,7 @@ animations = [{
 collision_layer = 4
 collision_mask = 7
 script = ExtResource("2_c16u0")
-health = 50.0
+health = 70.0
 attack_damage = 10.0
 defense_chance = 25.0
 move_speed = 25.0
@@ -331,7 +421,7 @@ cooldown_between_actions = 2.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_8r7af")
-animation = &"hurt"
+animation = &"death"
 autoplay = "idle"
 
 [node name="CollisionShape" parent="." index="2"]
