@@ -53,7 +53,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
-	if state == CombatState.DEAD: return
+	if is_dead(): return
 	match state:
 		CombatState.IDLE:
 			play_animation("idle")
@@ -67,6 +67,14 @@ func _physics_process(delta: float) -> void:
 
 func log_action(text: String) -> void:
 	print(text)
+
+
+func invalid_action_against_target() -> bool:
+	return is_dead() or target == null or is_instance_valid(target) == false
+
+
+func is_dead() -> bool:
+	return state == CombatState.DEAD
 
 
 func start_cooldown() -> void:
@@ -92,6 +100,11 @@ func flip_sprite(direction_x: float):
 		sprite.flip_h = direction_x < 0
 
 
+func reset_animations_check() -> void:
+	is_in_a_being_hitted_animation = false
+	is_in_a_defend_animation = false
+	is_in_an_attack_animation = false
+
 func _on_animation_finished() -> void:
 	match sprite.animation:
 		"attack":
@@ -106,13 +119,11 @@ func _on_animation_finished() -> void:
 			is_in_a_being_hitted_animation = false
 			play_animation("idle")
 		"idle":
-			is_in_a_being_hitted_animation = false
-			is_in_a_defend_animation = false
-			is_in_an_attack_animation = false
+			reset_animations_check()
 
 
 func start_battle() -> void:
-	if target == null or is_instance_valid(target) == false: return
+	if invalid_action_against_target(): return
 	if is_in_an_attack_animation or \
 		is_in_a_defend_animation or \
 		is_cooldown_active: return
@@ -125,6 +136,7 @@ func start_battle() -> void:
 
 
 func defend_attack() -> void:
+	if is_dead(): return
 	if (randf() > defense_chance): return
 	is_in_a_defend_animation = true
 	force_play_animation("defend")
@@ -132,6 +144,7 @@ func defend_attack() -> void:
 
 
 func receive_attack(damage: float) -> void:
+	if is_dead(): return
 	if is_in_a_defend_animation: return
 	if is_in_an_attack_animation:
 		is_in_an_attack_animation = false
@@ -146,12 +159,11 @@ func receive_attack(damage: float) -> void:
 
 
 func dead() -> void:
-	if state == CombatState.DEAD: return
+	if is_dead(): return
 	state = CombatState.DEAD
+	target = null
 	velocity = Vector2.ZERO
-	is_in_an_attack_animation = false
-	is_in_a_defend_animation = false
-	is_in_a_being_hitted_animation = false
+	reset_animations_check()
 	play_animation("death")
 	collision_shape.disabled = true
 	if detection_shape:
@@ -174,6 +186,7 @@ func _pick_new_wander_target():
 
 
 func wander(delta: float) -> void:
+	if is_dead(): return
 	if position.distance_to(_wander_target) < 5: 
 		_stop_and_wait(delta)
 	else:
@@ -190,8 +203,7 @@ func wander(delta: float) -> void:
 
 
 func chase(delta: float) -> void:
-	if target == null or is_instance_valid(target) == false: return
-	
+	if invalid_action_against_target(): return
 	var direction: Vector2 = (target.global_position - global_position).normalized()
 	play_animation("run")
 	flip_sprite(direction.x)
@@ -209,7 +221,7 @@ func _on_detection_area_body_entered(body: Node2D) -> void:
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	target = null
-	if state == CombatState.DEAD: return
+	if is_dead(): return
 	state = CombatState.WANDERING
 
 
@@ -218,4 +230,6 @@ func _on_attack_range_body_entered(body: Node2D) -> void:
 
 
 func _on_attack_range_body_exited(body: Node2D) -> void:
-	if state == CombatState.DEAD: return
+	if is_dead(): return
+	if target:
+		state = CombatState.CHASING
