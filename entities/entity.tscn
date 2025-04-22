@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://1tdfex0hadm1" path="res://entities/entity.gd" id="1_jm4vq"]
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
 script = ExtResource("1_jm4vq")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -21,10 +23,16 @@ collision_mask = 0
 [node name="DetectionShape" type="CollisionShape2D" parent="DetectionArea"]
 
 [node name="AttackRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 0
 
 [node name="AttackShape" type="CollisionShape2D" parent="AttackRange"]
 
-[connection signal="area_entered" from="DetectionArea" to="." method="_on_detection_area_area_entered"]
-[connection signal="area_exited" from="DetectionArea" to="." method="_on_detection_area_area_exited"]
-[connection signal="area_entered" from="AttackRange" to="." method="_on_attack_range_area_entered"]
-[connection signal="area_exited" from="AttackRange" to="." method="_on_attack_range_area_exited"]
+[node name="ActionCooldown" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="body_entered" from="DetectionArea" to="." method="_on_detection_area_body_entered"]
+[connection signal="body_exited" from="DetectionArea" to="." method="_on_detection_area_body_exited"]
+[connection signal="body_entered" from="AttackRange" to="." method="_on_attack_range_body_entered"]
+[connection signal="body_exited" from="AttackRange" to="." method="_on_attack_range_body_exited"]
+[connection signal="timeout" from="ActionCooldown" to="." method="_on_action_cooldown_timeout"]

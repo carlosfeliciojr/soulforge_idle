@@ -1,10 +1,11 @@
-[gd_scene load_steps=46 format=3 uid="uid://1ek5rnrpdv4q"]
+[gd_scene load_steps=52 format=3 uid="uid://1ek5rnrpdv4q"]
 
 [ext_resource type="PackedScene" uid="uid://c415t4tvgwntg" path="res://entities/entity.tscn" id="1_symyc"]
 [ext_resource type="Script" uid="uid://cy5jqnyl0110" path="res://entities/player/player.gd" id="2_abrql"]
 [ext_resource type="Texture2D" uid="uid://hsu6mv4vfd2v" path="res://assets/sprites/knight blue/ATTACK 1.png" id="3_fkugw"]
 [ext_resource type="Texture2D" uid="uid://87jedlu212mv" path="res://assets/sprites/knight blue/IDLE.png" id="3_sglur"]
 [ext_resource type="Texture2D" uid="uid://cw0fdm6yqnfoj" path="res://assets/sprites/knight blue/DEFEND.png" id="4_8fjmc"]
+[ext_resource type="Texture2D" uid="uid://b1cgsb7qdyp3w" path="res://assets/sprites/knight blue/HURT.png" id="5_wvtmh"]
 [ext_resource type="Texture2D" uid="uid://diar75e826j5w" path="res://assets/sprites/knight blue/RUN.png" id="6_qiwj3"]
 [ext_resource type="Texture2D" uid="uid://c4ct0mtmdordl" path="res://assets/sprites/knight blue/WALK.png" id="7_26q78"]
 [ext_resource type="Shape2D" uid="uid://cj30r8lc3oy8q" path="res://resources/collision_shape/human_collision_shape.tres" id="8_26q78"]
@@ -57,6 +58,22 @@ region = Rect2(384, 0, 96, 84)
 [sub_resource type="AtlasTexture" id="AtlasTexture_221hk"]
 atlas = ExtResource("4_8fjmc")
 region = Rect2(480, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wy7bt"]
+atlas = ExtResource("5_wvtmh")
+region = Rect2(0, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_geky7"]
+atlas = ExtResource("5_wvtmh")
+region = Rect2(96, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qwspa"]
+atlas = ExtResource("5_wvtmh")
+region = Rect2(192, 0, 96, 84)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r633c"]
+atlas = ExtResource("5_wvtmh")
+region = Rect2(288, 0, 96, 84)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bls4j"]
 atlas = ExtResource("3_sglur")
@@ -200,6 +217,23 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_wy7bt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_geky7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qwspa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r633c")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_bls4j")
 }, {
 "duration": 1.0,
@@ -283,16 +317,25 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wvtmh"]
+radius = 14.0
+height = 32.0
+
 [node name="Player" groups=["Player"] instance=ExtResource("1_symyc")]
+collision_layer = 2
+collision_mask = 7
 script = ExtResource("2_abrql")
-defense_chance = 1.0
-move_speed = 200.0
+health = 100.0
+attack_damage = 20.0
+defense_chance = 0.5
+move_speed = 25.0
+detection_radius = 64.0
+cooldown_between_actions = 2.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_7thud")
-animation = &"run"
+animation = &"hurt"
 autoplay = "idle"
-frame_progress = 0.552429
 
 [node name="CollisionShape" parent="." index="2"]
 light_mask = 1
@@ -302,9 +345,16 @@ rotation = 1.5708
 shape = ExtResource("8_26q78")
 
 [node name="DetectionArea" parent="." index="3"]
-collision_layer = 2
 collision_mask = 4
 
 [node name="DetectionShape" parent="DetectionArea" index="0"]
 position = Vector2(0, 14)
 shape = ExtResource("9_bectd")
+
+[node name="AttackRange" parent="." index="4"]
+collision_mask = 4
+
+[node name="AttackShape" parent="AttackRange" index="0"]
+position = Vector2(0, 14)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_wvtmh")
