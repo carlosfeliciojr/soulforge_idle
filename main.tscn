@@ -1156,7 +1156,7 @@ tile_set = SubResource("TileSet_1bvp3")
 position = Vector2(320, 180)
 
 [node name="Knight" parent="." instance=ExtResource("3_h2yge")]
-position = Vector2(389, 162)
+position = Vector2(349, 159)
 defense_chance = 0.25
 detection_radius = 128.0
 

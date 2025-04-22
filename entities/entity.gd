@@ -32,6 +32,7 @@ var state: CombatState = CombatState.WANDERING
 var target: Entity
 var is_in_an_attack_animation: bool = false
 var is_in_a_defend_animation: bool = false
+var is_in_a_being_hitted_animation: bool = false
 var is_cooldown_active: bool = false
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
@@ -91,18 +92,20 @@ func flip_sprite(direction_x: float):
 func _on_animation_finished() -> void:
 	match sprite.animation:
 		"attack":
-			target.receive_attack(attack_damage)
-			play_animation("idle")
 			is_in_an_attack_animation = false
-			start_cooldown()
-
+			if !target.is_in_a_defend_animation:
+				target.receive_attack(attack_damage)
+			play_animation("idle")
 		"defend":
 			is_in_a_defend_animation = false
 			play_animation("idle")
-			start_cooldown()
-
 		"hurt":
+			is_in_a_being_hitted_animation = false
 			play_animation("idle")
+		"idle":
+			is_in_a_being_hitted_animation = false
+			is_in_a_defend_animation = false
+			is_in_an_attack_animation = false
 
 
 func start_battle() -> void:
@@ -110,6 +113,7 @@ func start_battle() -> void:
 	if is_in_an_attack_animation or \
 		is_in_a_defend_animation or \
 		is_cooldown_active: return
+	start_cooldown()
 	if target.has_method("receive_attack"):
 		target.defend_attack()
 		log_action("Attacking")
@@ -126,11 +130,15 @@ func defend_attack() -> void:
 
 func receive_attack(damage: float) -> void:
 	if is_in_a_defend_animation: return
+	if is_in_an_attack_animation:
+		is_in_an_attack_animation = false
 	health -= damage
+	is_in_a_being_hitted_animation = true
 	force_play_animation("hurt")
 	log_action("Being hitted")
-	if health <= 0:
-		state = CombatState.DEAD
+	# TODO: This code cause bug, because don't have DEAD status
+	#if health <= 0:
+		#state = CombatState.DEAD
 
 
 func _stop_and_wait(delta: float):

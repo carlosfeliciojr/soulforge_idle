@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c4ct0mtmdordl" path="res://assets/sprites/knight blue/WALK.png" id="7_26q78"]
 [ext_resource type="Shape2D" uid="uid://cj30r8lc3oy8q" path="res://resources/collision_shape/human_collision_shape.tres" id="8_26q78"]
 [ext_resource type="Shape2D" uid="uid://bthbh310k1sot" path="res://resources/detection_area/detection_area.tres" id="9_bectd"]
+[ext_resource type="Shape2D" uid="uid://b6fpaupod26na" path="res://resources/attack_range/human_short_attack_range.tres" id="11_7thud"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7thud"]
 atlas = ExtResource("3_fkugw")
@@ -317,10 +318,6 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wvtmh"]
-radius = 14.0
-height = 32.0
-
 [node name="Player" groups=["Player"] instance=ExtResource("1_symyc")]
 collision_layer = 2
 collision_mask = 7
@@ -357,4 +354,4 @@ collision_mask = 4
 [node name="AttackShape" parent="AttackRange" index="0"]
 position = Vector2(0, 14)
 rotation = 1.5708
-shape = SubResource("CapsuleShape2D_wvtmh")
+shape = ExtResource("11_7thud")
