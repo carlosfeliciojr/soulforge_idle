@@ -1160,6 +1160,26 @@ position = Vector2(349, 159)
 defense_chance = 0.25
 detection_radius = 128.0
 
-[node name="Player" parent="." instance=ExtResource("4_1bvp3")]
-position = Vector2(224, 157)
+[node name="Knight2" parent="." instance=ExtResource("3_h2yge")]
+position = Vector2(470, 76)
+defense_chance = 0.25
 detection_radius = 128.0
+
+[node name="Knight3" parent="." instance=ExtResource("3_h2yge")]
+position = Vector2(612, 271)
+defense_chance = 0.25
+move_speed = 0.0
+detection_radius = 128.0
+
+[node name="Knight4" parent="." instance=ExtResource("3_h2yge")]
+position = Vector2(25, 151)
+defense_chance = 0.25
+detection_radius = 128.0
+
+[node name="Player" parent="." instance=ExtResource("4_1bvp3")]
+position = Vector2(212, 229)
+detection_radius = 256.0
+
+[node name="Player2" parent="." instance=ExtResource("4_1bvp3")]
+position = Vector2(230, 51)
+detection_radius = 256.0

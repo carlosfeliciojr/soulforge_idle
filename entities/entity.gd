@@ -31,6 +31,7 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 
 
 var state: CombatState = CombatState.WANDERING
+var targets: Array[Entity]
 var target: Entity
 var is_in_an_attack_animation: bool = false
 var is_in_a_defend_animation: bool = false
@@ -54,6 +55,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
 	if is_dead(): return
+	if target and target.is_dead(): get_next_target()
 	match state:
 		CombatState.IDLE:
 			play_animation("idle")
@@ -70,11 +72,15 @@ func log_action(text: String) -> void:
 
 
 func invalid_action_against_target() -> bool:
-	return is_dead() or target == null or is_instance_valid(target) == false
+	return is_dead() or target == null or is_instance_valid(target) == false or target.is_dead()
 
 
 func is_dead() -> bool:
 	return state == CombatState.DEAD
+
+
+func is_in_danger() -> bool:
+	return target != null
 
 
 func start_cooldown() -> void:
@@ -105,6 +111,32 @@ func reset_animations_check() -> void:
 	is_in_a_defend_animation = false
 	is_in_an_attack_animation = false
 
+
+func get_next_target() -> Entity:
+	# TODO: Parece que quando sobra 2 players, um persegue o outro. Olhar enemy.gd e player.gd
+	# TODO: Parece que não está pegando a entidade inimiga mais próxima, 
+	# pois está as vezes focando em uma entidade mais longe
+	# TODO: Está atacando de longe as vezes, provavelmente o outro target
+	# está no alcance mas não está executando o chase e atacando imediatamente.
+	var target_index: int = targets.find(target)
+	if target_index != -1 and !targets.is_empty():
+		targets.remove_at(target_index)
+		var next_target_index: int = targets.find_custom(next_target_condition)
+		if next_target_index < 0 or targets.is_empty(): return null
+		return targets[next_target_index]
+	else:
+		return null
+
+
+func next_target_condition(next_target: Entity) -> bool:
+	var self_distance: float = next_target.global_position.distance_to(global_position)
+	for target in targets:
+		var distance: float  = target.global_position.distance_to(global_position)
+		if distance < self_distance:
+			return false
+	return true
+
+
 func _on_animation_finished() -> void:
 	match sprite.animation:
 		"attack":
@@ -129,8 +161,8 @@ func start_battle() -> void:
 		is_cooldown_active: return
 	start_cooldown()
 	if target.has_method("receive_attack"):
+		if target.is_dead(): return
 		target.defend_attack()
-		log_action("Attacking")
 		is_in_an_attack_animation = true
 		force_play_animation("attack")
 
@@ -140,7 +172,6 @@ func defend_attack() -> void:
 	if (randf() > defense_chance): return
 	is_in_a_defend_animation = true
 	force_play_animation("defend")
-	log_action("Defended")
 
 
 func receive_attack(damage: float) -> void:
@@ -151,11 +182,8 @@ func receive_attack(damage: float) -> void:
 	health -= damage
 	is_in_a_being_hitted_animation = true
 	force_play_animation("hurt")
-	log_action("Being hitted. Health is %f" % health)
-
 	if health <= 0:
 		dead()
-		log_action("is dead")
 
 
 func dead() -> void:
@@ -204,6 +232,9 @@ func wander(delta: float) -> void:
 
 func chase(delta: float) -> void:
 	if invalid_action_against_target(): return
+	#if target.is_dead():
+		#target = get_next_target()
+	#if invalid_action_against_target(): return
 	var direction: Vector2 = (target.global_position - global_position).normalized()
 	play_animation("run")
 	flip_sprite(direction.x)
@@ -216,20 +247,31 @@ func _on_action_cooldown_timeout() -> void:
 
 
 func _on_detection_area_body_entered(body: Node2D) -> void:
-	log_action("entered in detection area")
+	if is_dead(): return
+	log_action("some entity entered in detection area")
+	log_action("current entity state: %s" % CombatState.keys()[state])
 
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
-	target = null
 	if is_dead(): return
-	state = CombatState.WANDERING
+	if target and target.is_dead():
+		target = get_next_target()
+		if target: 
+			state = CombatState.CHASING
+		else:
+			state = CombatState.WANDERING
+		return
 
 
 func _on_attack_range_body_entered(body: Node2D) -> void:
-	log_action("entered in attack range area")
+	if is_dead(): return
 
 
 func _on_attack_range_body_exited(body: Node2D) -> void:
 	if is_dead(): return
-	if target:
-		state = CombatState.CHASING
+	if target and target.is_dead():
+		target = get_next_target()
+		if target: 
+			state = CombatState.CHASING
+		else:
+			state = CombatState.WANDERING
