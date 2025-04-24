@@ -410,7 +410,7 @@ animations = [{
 
 [node name="Knight" groups=["Enemy"] instance=ExtResource("1_mwajj")]
 collision_layer = 4
-collision_mask = 7
+collision_mask = 3
 script = ExtResource("2_c16u0")
 health = 70.0
 attack_damage = 10.0

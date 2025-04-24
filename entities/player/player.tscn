@@ -410,7 +410,7 @@ animations = [{
 
 [node name="Player" groups=["Player"] instance=ExtResource("1_symyc")]
 collision_layer = 2
-collision_mask = 7
+collision_mask = 5
 script = ExtResource("2_abrql")
 health = 100.0
 attack_damage = 20.0

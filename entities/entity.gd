@@ -113,11 +113,6 @@ func reset_animations_check() -> void:
 
 
 func get_next_target() -> Entity:
-	# TODO: Parece que quando sobra 2 players, um persegue o outro. Olhar enemy.gd e player.gd
-	# TODO: Parece que não está pegando a entidade inimiga mais próxima, 
-	# pois está as vezes focando em uma entidade mais longe
-	# TODO: Está atacando de longe as vezes, provavelmente o outro target
-	# está no alcance mas não está executando o chase e atacando imediatamente.
 	var target_index: int = targets.find(target)
 	if target_index != -1 and !targets.is_empty():
 		targets.remove_at(target_index)
@@ -232,9 +227,6 @@ func wander(delta: float) -> void:
 
 func chase(delta: float) -> void:
 	if invalid_action_against_target(): return
-	#if target.is_dead():
-		#target = get_next_target()
-	#if invalid_action_against_target(): return
 	var direction: Vector2 = (target.global_position - global_position).normalized()
 	play_animation("run")
 	flip_sprite(direction.x)
