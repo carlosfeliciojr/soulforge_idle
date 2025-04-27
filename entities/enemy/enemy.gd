@@ -12,10 +12,6 @@ func set_player_as_target(body: Node2D) -> Player:
 	return null
 
 
-func log_action(text: String) -> void:
-	super.log_action("Enemy: %s" % [text])
-
-
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	super._on_detection_area_body_exited(body)
 	if body.is_in_group("Player"):

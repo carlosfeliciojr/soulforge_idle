@@ -68,7 +68,7 @@ func _physics_process(delta: float) -> void:
 
 
 func log_action(text: String) -> void:
-	print(text)
+	print("%s: %s" % [name, text])
 
 
 func invalid_action_against_target() -> bool:
@@ -151,9 +151,13 @@ func _on_animation_finished() -> void:
 
 func start_battle() -> void:
 	if invalid_action_against_target(): return
+	
+	# TODO: It seems that the error of reaching the enemy but not attacking occurs because one of 
+	# the values below is set to true.
 	if is_in_an_attack_animation or \
-		is_in_a_defend_animation or \
-		is_cooldown_active: return
+	is_in_a_defend_animation or \
+	is_cooldown_active: return
+	
 	start_cooldown()
 	if target.has_method("receive_attack"):
 		if target.is_dead(): return
@@ -210,7 +214,7 @@ func _pick_new_wander_target():
 
 func wander(delta: float) -> void:
 	if is_dead(): return
-	if position.distance_to(_wander_target) < 5: 
+	if position.distance_to(_wander_target) < 5:
 		_stop_and_wait(delta)
 	else:
 		var direction: Vector2 = ( _wander_target - position ).normalized()
@@ -231,7 +235,7 @@ func chase(delta: float) -> void:
 	play_animation("run")
 	flip_sprite(direction.x)
 	velocity = direction * move_speed * 1.50
-	move_and_collide(velocity * delta)
+	move_and_slide()
 
 
 func _on_action_cooldown_timeout() -> void:
@@ -240,8 +244,6 @@ func _on_action_cooldown_timeout() -> void:
 
 func _on_detection_area_body_entered(body: Node2D) -> void:
 	if is_dead(): return
-	log_action("some entity entered in detection area")
-	log_action("current entity state: %s" % CombatState.keys()[state])
 
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
