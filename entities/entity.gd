@@ -11,10 +11,11 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var detection_area: Area2D = $DetectionArea
-@onready var attack_range: Area2D = $AttackRange
 @onready var collision_shape: CollisionShape2D = $CollisionShape
 @onready var detection_shape: CollisionShape2D = $DetectionArea/DetectionShape
+@onready var attack_shape: CollisionShape2D = $AttackRange/AttackShape
 @onready var action_cooldown: Timer = $ActionCooldown
+
 
 @export var health: float
 @export var attack_damage: float
@@ -34,27 +35,37 @@ var state: CombatState = CombatState.WANDERING
 var targets_in_detection_area: Array[Entity]
 var targets_in_attack_area: Array[Entity]
 var target: Entity
-var is_in_an_attack_animation: bool = false
 var is_in_a_defend_animation: bool = false
-var is_in_a_being_hitted_animation: bool = false
 var is_cooldown_active: bool = false
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
 
 func _ready() -> void:
+	set_detection_radius()
+	
+	sprite.animation_finished.connect(_on_animation_finished)
+	
+
+	_pick_new_wander_target()
+
+
+func set_detection_radius() -> void:
 	var circle = CircleShape2D.new()
 	circle.radius = detection_radius
 	detection_shape.shape = circle
 	detection_shape.position = collision_shape.position
-	sprite.animation_finished.connect(_on_animation_finished)
 
-	_pick_new_wander_target()
+
+func set_attack_radius() -> void:
+	var circle = CircleShape2D.new()
+	circle.radius = attack_range_radius
+	attack_shape.shape = circle
+	attack_shape.position = collision_shape.position
 
 
 func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
 	if is_dead(): return
-	#if target and target.is_dead(): get_next_target()
 	match state:
 		CombatState.IDLE:
 			play_animation("idle")
@@ -103,12 +114,6 @@ func force_play_animation(animation_name: String) -> void:
 func flip_sprite(direction_x: float):
 	if abs(direction_x) > 0.01:
 		sprite.flip_h = direction_x < 0
-
-
-func reset_animations_check() -> void:
-	is_in_a_being_hitted_animation = false
-	is_in_a_defend_animation = false
-	is_in_an_attack_animation = false
 
 
 func add_target(new_target: Entity, targets: Array[Entity]) -> void:
@@ -169,7 +174,6 @@ func nearest_target_condition(next_target: Entity) -> bool:
 func _on_animation_finished() -> void:
 	match sprite.animation:
 		"attack":
-			is_in_an_attack_animation = false
 			if !target.is_in_a_defend_animation:
 				target.receive_attack(attack_damage)
 			play_animation("idle")
@@ -177,10 +181,7 @@ func _on_animation_finished() -> void:
 			is_in_a_defend_animation = false
 			play_animation("idle")
 		"hurt":
-			is_in_a_being_hitted_animation = false
 			play_animation("idle")
-		"idle":
-			reset_animations_check()
 
 
 func start_battle() -> void:
@@ -189,11 +190,8 @@ func start_battle() -> void:
 	
 	start_cooldown()
 	if target.has_method("receive_attack"):
-		if name == "Player1":
-			print("iniciar teste")
 		if target.is_dead(): return
 		target.defend_attack()
-		is_in_an_attack_animation = true
 		force_play_animation("attack")
 
 
@@ -207,10 +205,7 @@ func defend_attack() -> void:
 func receive_attack(damage: float) -> void:
 	if is_dead(): return
 	if is_in_a_defend_animation: return
-	if is_in_an_attack_animation:
-		is_in_an_attack_animation = false
 	health -= damage
-	is_in_a_being_hitted_animation = true
 	force_play_animation("hurt")
 	if health <= 0:
 		dead()
@@ -221,7 +216,6 @@ func dead() -> void:
 	state = CombatState.DEAD
 	target = null
 	velocity = Vector2.ZERO
-	reset_animations_check()
 	force_play_animation("death")
 	collision_shape.disabled = true
 	if detection_shape:
@@ -279,13 +273,6 @@ func _on_detection_area_body_entered(body: Node2D) -> void:
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	if is_dead(): return
-	# if target and target.is_dead():
-	# 	target = get_next_target()
-	# 	if target:
-	# 		state = CombatState.CHASING
-	# 	else:
-	# 		state = CombatState.WANDERING
-	# 	return
 
 
 func _on_attack_range_body_entered(body: Node2D) -> void:
@@ -294,9 +281,3 @@ func _on_attack_range_body_entered(body: Node2D) -> void:
 
 func _on_attack_range_body_exited(body: Node2D) -> void:
 	if is_dead(): return
-	# if target and target.is_dead():
-	# 	target = get_next_target()
-	# 	if target:
-	# 		state = CombatState.CHASING
-	# 	else:
-	# 		state = CombatState.WANDERING
