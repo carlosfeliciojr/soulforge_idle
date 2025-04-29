@@ -417,6 +417,7 @@ attack_damage = 10.0
 defense_chance = 25.0
 move_speed = 25.0
 detection_radius = 64.0
+attack_range_radius = 14.0
 cooldown_between_actions = 2.0
 
 [node name="AnimatedSprite2D" parent="." index="0"]
