@@ -1,4 +1,4 @@
-[gd_scene load_steps=66 format=3 uid="uid://1ek5rnrpdv4q"]
+[gd_scene load_steps=65 format=3 uid="uid://1ek5rnrpdv4q"]
 
 [ext_resource type="PackedScene" uid="uid://c415t4tvgwntg" path="res://entities/entity.tscn" id="1_symyc"]
 [ext_resource type="Script" uid="uid://cy5jqnyl0110" path="res://entities/player/player.gd" id="2_abrql"]
@@ -408,11 +408,6 @@ animations = [{
 "speed": 10.0
 }]
 
-[sub_resource type="LabelSettings" id="LabelSettings_a1qjk"]
-font_size = 10
-shadow_size = 2
-shadow_color = Color(0, 0, 0, 1)
-
 [node name="Player" groups=["Player"] instance=ExtResource("1_symyc")]
 collision_layer = 2
 collision_mask = 5
@@ -450,13 +445,3 @@ collision_mask = 4
 position = Vector2(0, 14)
 rotation = 1.5708
 shape = ExtResource("11_7thud")
-
-[node name="Label" type="Label" parent="." index="6"]
-offset_left = -20.0
-offset_top = 16.0
-offset_right = 20.0
-offset_bottom = 30.0
-text = "Name"
-label_settings = SubResource("LabelSettings_a1qjk")
-horizontal_alignment = 1
-vertical_alignment = 1

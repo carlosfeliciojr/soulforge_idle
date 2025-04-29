@@ -31,7 +31,8 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 
 
 var state: CombatState = CombatState.WANDERING
-var targets: Array[Entity]
+var targets_in_detection_area: Array[Entity]
+var targets_in_attack_area: Array[Entity]
 var target: Entity
 var is_in_an_attack_animation: bool = false
 var is_in_a_defend_animation: bool = false
@@ -44,9 +45,7 @@ func _ready() -> void:
 	var circle = CircleShape2D.new()
 	circle.radius = detection_radius
 	detection_shape.shape = circle
-	detection_shape.debug_color = Color("ab82006b")
 	detection_shape.position = collision_shape.position
-	
 	sprite.animation_finished.connect(_on_animation_finished)
 
 	_pick_new_wander_target()
@@ -55,7 +54,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	sprite.z_index = int(global_position.y)
 	if is_dead(): return
-	if target and target.is_dead(): get_next_target()
+	#if target and target.is_dead(): get_next_target()
 	match state:
 		CombatState.IDLE:
 			play_animation("idle")
@@ -91,13 +90,13 @@ func start_cooldown() -> void:
 	is_cooldown_active = true
 
 
-func play_animation(name: String) -> void:
-	if sprite.animation != name:
-		sprite.play(name)
+func play_animation(animation_name: String) -> void:
+	if sprite.animation != animation_name:
+		sprite.play(animation_name)
 
 
-func force_play_animation(name: String) -> void:
-	sprite.play(name)
+func force_play_animation(animation_name: String) -> void:
+	sprite.play(animation_name)
 	sprite.frame = 0
 
 
@@ -112,21 +111,56 @@ func reset_animations_check() -> void:
 	is_in_an_attack_animation = false
 
 
-func get_next_target() -> Entity:
-	var target_index: int = targets.find(target)
-	if target_index != -1 and !targets.is_empty():
-		targets.remove_at(target_index)
-		var next_target_index: int = targets.find_custom(next_target_condition)
-		if next_target_index < 0 or targets.is_empty(): return null
-		return targets[next_target_index]
+func add_target(new_target: Entity, targets: Array[Entity]) -> void:
+	var new_target_index: int = targets.find(new_target)
+	if new_target_index > -1: return
+	targets.append(new_target)
+	get_next_target()
+
+
+func remove_target_from_targets(
+	target_to_remove: Entity,
+	targets: Array[Entity],
+	) -> void:
+	var player_index: int = targets.find(target_to_remove)
+	if player_index != -1 and !targets.is_empty():
+		targets.remove_at(player_index)
+
+
+func get_next_target() -> void:
+	if is_dead(): return
+	if (targets_in_attack_area.is_empty() and targets_in_detection_area.is_empty()):
+		target = null
+		state = CombatState.WANDERING
+		return
+
+	if !targets_in_attack_area.is_empty():
+		target = get_target_from_targets(targets_in_attack_area, nearest_target_condition)
+		if target: state = CombatState.BATTLING
+		return
+		
+	if !targets_in_detection_area.is_empty():
+		target = get_target_from_targets(targets_in_detection_area, nearest_target_condition)
+		if target: state = CombatState.CHASING
+		return
+
+
+func get_target_from_targets(
+	targets: Array[Entity],
+	condition: Callable,
+	) -> Entity:
+	if targets.is_empty(): return null
+	var target_index: int = targets.find_custom(condition)
+	if target_index > -1:
+		return targets[target_index]
 	else:
 		return null
 
 
-func next_target_condition(next_target: Entity) -> bool:
+func nearest_target_condition(next_target: Entity) -> bool:
 	var self_distance: float = next_target.global_position.distance_to(global_position)
-	for target in targets:
-		var distance: float  = target.global_position.distance_to(global_position)
+	for _target in targets_in_detection_area:
+		var distance: float = _target.global_position.distance_to(global_position)
 		if distance < self_distance:
 			return false
 	return true
@@ -151,15 +185,12 @@ func _on_animation_finished() -> void:
 
 func start_battle() -> void:
 	if invalid_action_against_target(): return
-	
-	# TODO: It seems that the error of reaching the enemy but not attacking occurs because one of 
-	# the values below is set to true.
-	if is_in_an_attack_animation or \
-	is_in_a_defend_animation or \
-	is_cooldown_active: return
+	if is_cooldown_active: return
 	
 	start_cooldown()
 	if target.has_method("receive_attack"):
+		if name == "Player1":
+			print("iniciar teste")
 		if target.is_dead(): return
 		target.defend_attack()
 		is_in_an_attack_animation = true
@@ -191,7 +222,7 @@ func dead() -> void:
 	target = null
 	velocity = Vector2.ZERO
 	reset_animations_check()
-	play_animation("death")
+	force_play_animation("death")
 	collision_shape.disabled = true
 	if detection_shape:
 		detection_shape.disabled = true
@@ -217,9 +248,9 @@ func wander(delta: float) -> void:
 	if position.distance_to(_wander_target) < 5:
 		_stop_and_wait(delta)
 	else:
-		var direction: Vector2 = ( _wander_target - position ).normalized()
+		var direction: Vector2 = (_wander_target - position).normalized()
 		velocity = direction * move_speed
-		move_and_slide()
+		move_and_collide(velocity * delta)
 		
 		if get_slide_collision_count() > 0:
 			_pick_new_wander_target()
@@ -235,7 +266,7 @@ func chase(delta: float) -> void:
 	play_animation("run")
 	flip_sprite(direction.x)
 	velocity = direction * move_speed * 1.50
-	move_and_slide()
+	move_and_collide(velocity * delta)
 
 
 func _on_action_cooldown_timeout() -> void:
@@ -248,13 +279,13 @@ func _on_detection_area_body_entered(body: Node2D) -> void:
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	if is_dead(): return
-	if target and target.is_dead():
-		target = get_next_target()
-		if target: 
-			state = CombatState.CHASING
-		else:
-			state = CombatState.WANDERING
-		return
+	# if target and target.is_dead():
+	# 	target = get_next_target()
+	# 	if target:
+	# 		state = CombatState.CHASING
+	# 	else:
+	# 		state = CombatState.WANDERING
+	# 	return
 
 
 func _on_attack_range_body_entered(body: Node2D) -> void:
@@ -263,9 +294,9 @@ func _on_attack_range_body_entered(body: Node2D) -> void:
 
 func _on_attack_range_body_exited(body: Node2D) -> void:
 	if is_dead(): return
-	if target and target.is_dead():
-		target = get_next_target()
-		if target: 
-			state = CombatState.CHASING
-		else:
-			state = CombatState.WANDERING
+	# if target and target.is_dead():
+	# 	target = get_next_target()
+	# 	if target:
+	# 		state = CombatState.CHASING
+	# 	else:
+	# 		state = CombatState.WANDERING

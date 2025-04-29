@@ -1179,11 +1179,3 @@ detection_radius = 128.0
 position = Vector2(209, 215)
 defense_chance = 1.0
 detection_radius = 256.0
-
-[node name="Player2" parent="." instance=ExtResource("4_1bvp3")]
-position = Vector2(210, 199)
-detection_radius = 256.0
-
-[node name="Player3" parent="." instance=ExtResource("4_1bvp3")]
-position = Vector2(209, 184)
-detection_radius = 256.0
