@@ -270,14 +270,14 @@ func wander(delta: float) -> void:
 	else:
 		var direction: Vector2 = (_wander_target - position).normalized()
 		velocity = direction * move_speed
-		move_and_collide(velocity * delta)
+		move_and_slide()
 		
 		if get_slide_collision_count() > 0:
 			_pick_new_wander_target()
 			_stop_and_wait(delta)
 		else:
 			play_animation("walk")
-			flip_sprite(direction)
+			flip_sprite(_wander_target)
 
 
 func chase(delta: float) -> void:
