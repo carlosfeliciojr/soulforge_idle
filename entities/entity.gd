@@ -20,6 +20,7 @@ const CombatState = preload("res://globals/enums/combat_states.gd").CombatState
 @export var health: float
 @export var attack_damage: float
 @export var defense_chance: float
+@export var flee_chance: float
 @export var move_speed: float
 @export var attack_speed: float
 @export var detection_radius: float
@@ -36,6 +37,7 @@ var targets_in_detection_area: Array[Entity]
 var targets_in_attack_area: Array[Entity]
 var target: Entity
 var is_in_a_defend_animation: bool = false
+var is_in_a_flee_animation: bool = false
 var is_cooldown_active: bool = false
 var _wander_target: Vector2
 var _wander_timer: float = 0.0
@@ -111,9 +113,10 @@ func force_play_animation(animation_name: String) -> void:
 	sprite.frame = 0
 
 
-func flip_sprite(direction_x: float):
-	if abs(direction_x) > 0.01:
-		sprite.flip_h = direction_x < 0
+func flip_sprite(destination: Vector2) -> void:
+	var direction: Vector2 = (destination - global_position).normalized()
+	if abs(direction.x) > 0.01:
+		sprite.flip_h = direction.x < 0
 
 
 func add_target(new_target: Entity, targets: Array[Entity]) -> void:
@@ -175,6 +178,7 @@ func _on_animation_finished() -> void:
 	match sprite.animation:
 		"attack":
 			if !target.is_in_a_defend_animation:
+				target.flee_attack(self)
 				target.receive_attack(attack_damage)
 			play_animation("idle")
 		"defend":
@@ -192,19 +196,40 @@ func start_battle() -> void:
 	if target.has_method("receive_attack"):
 		if target.is_dead(): return
 		target.defend_attack()
+		flip_sprite(target.global_position)
 		force_play_animation("attack")
 
 
 func defend_attack() -> void:
-	if is_dead(): return
+	if is_dead() or is_in_a_flee_animation or is_in_a_defend_animation: return
 	if (randf() > defense_chance): return
 	is_in_a_defend_animation = true
 	force_play_animation("defend")
 
 
+func flee_attack(from_entity: Entity) -> void:
+	if is_dead() or is_in_a_flee_animation or is_in_a_defend_animation: return
+	if (randf() > flee_chance): return
+	is_in_a_flee_animation = true
+	flip_sprite(from_entity.global_position)
+	_flee_animation(from_entity.global_position)
+	is_in_a_flee_animation = false
+
+
+func _flee_animation(from_entity_position: Vector2) -> void:
+	var direction: Vector2 = (from_entity_position - global_position).normalized()
+	var tween: Tween = create_tween()
+	if abs(direction.x) > 0.01:
+		tween.tween_property($AnimatedSprite2D, "offset",  Vector2(-5, 0), 0.05)
+	else:
+		tween.tween_property($AnimatedSprite2D, "offset",  Vector2(5, 0), 0.05)
+	tween.tween_property($AnimatedSprite2D, "offset", Vector2(0, 0), 0.1)
+	await tween.finished
+
+
 func receive_attack(damage: float) -> void:
 	if is_dead(): return
-	if is_in_a_defend_animation: return
+	if is_in_a_defend_animation or is_in_a_flee_animation: return
 	health -= damage
 	force_play_animation("hurt")
 	if health <= 0:
@@ -251,14 +276,14 @@ func wander(delta: float) -> void:
 			_stop_and_wait(delta)
 		else:
 			play_animation("walk")
-			flip_sprite(direction.x)
+			flip_sprite(direction)
 
 
 func chase(delta: float) -> void:
 	if invalid_action_against_target(): return
 	var direction: Vector2 = (target.global_position - global_position).normalized()
 	play_animation("run")
-	flip_sprite(direction.x)
+	flip_sprite(target.global_position)
 	velocity = direction * move_speed * 1.50
 	move_and_collide(velocity * delta)
 
