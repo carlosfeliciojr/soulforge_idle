@@ -214,7 +214,7 @@ func flee_attack(from_entity: Entity) -> void:
 	if (randf() > flee_chance): return
 	is_in_a_flee_animation = true
 	flip_sprite(from_entity.global_position)
-	_flee_animation(from_entity.global_position)
+	await _flee_animation(from_entity.global_position)
 	is_in_a_flee_animation = false
 
 
@@ -222,9 +222,9 @@ func _flee_animation(from_entity_position: Vector2) -> void:
 	var direction: Vector2 = (from_entity_position - global_position).normalized()
 	var tween: Tween = create_tween()
 	if abs(direction.x) > 0.01:
-		tween.tween_property($AnimatedSprite2D, "offset",  Vector2(-5, 0), 0.05)
+		tween.tween_property($AnimatedSprite2D, "offset", Vector2(-5, 0), 0.05)
 	else:
-		tween.tween_property($AnimatedSprite2D, "offset",  Vector2(5, 0), 0.05)
+		tween.tween_property($AnimatedSprite2D, "offset", Vector2(5, 0), 0.05)
 	tween.tween_property($AnimatedSprite2D, "offset", Vector2(0, 0), 0.1)
 	await tween.finished
 
@@ -243,7 +243,6 @@ func dead() -> void:
 	state = CombatState.DEAD
 	target = null
 	velocity = Vector2.ZERO
-	force_play_animation("death")
 	collision_shape.disabled = true
 	if detection_shape:
 		detection_shape.disabled = true
