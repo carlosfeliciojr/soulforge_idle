@@ -109,6 +109,7 @@ func play_animation(animation_name: String) -> void:
 
 
 func force_play_animation(animation_name: String) -> void:
+	if animation_name != "defend": is_in_a_defend_animation = false
 	sprite.play(animation_name)
 	sprite.frame = 0
 
