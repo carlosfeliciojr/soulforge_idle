@@ -185,7 +185,8 @@ func _on_animation_finished() -> void:
 			is_in_a_defend_animation = false
 			play_animation("idle")
 		"hurt":
-			play_animation("idle")
+			if state == CombatState.DEAD: play_animation("death")
+			else: play_animation("idle")
 
 
 func start_battle() -> void:
